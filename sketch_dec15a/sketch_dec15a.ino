@@ -111,6 +111,10 @@ int Sensor (){
   
       while ((sensorTiltBefore >= 0) == (sensorTilt >= 0)){
         updateMotionSensor();
+        loopNum++;
+        if (loopNum > 10) {
+          break;
+        }
       }
       
     }
@@ -239,9 +243,16 @@ void loop (){
     return;
   }
 
-  if (AuthTag() == 0){
+  delay(interval);
+
+  int Tagflag = AuthTag();
+
+  if (Tagflag == 0){
+    Serial.println("タグを検出していません");
     return;
   }
+
+  
 
   if (AuthPeople() == 1){
     Serial.println("Alert002");
@@ -250,6 +261,7 @@ void loop (){
   }
 
   Serial.println("Success!");
+  
   
 }
 
