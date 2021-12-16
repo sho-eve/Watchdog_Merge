@@ -181,8 +181,8 @@ int AuthTag (){
     return 0;
   }
 
-  if (mfrc522.uid.uidByte[0] == 0x03 && mfrc522.uid.uidByte[1] == 0x28 //UID
-  && mfrc522.uid.uidByte[2] == 0x46 && mfrc522.uid.uidByte[3] == 0x18){
+  if (mfrc522.uid.uidByte[0] == 0xAA && mfrc522.uid.uidByte[1] == 0x35 //UID
+  && mfrc522.uid.uidByte[2] == 0x1B && mfrc522.uid.uidByte[3] == 0xB1){
     Serial.println("入室可能なIDです");
     Serial.println("入室する人数を入力してください");
     Serial.print("入室予定人数：");
@@ -235,6 +235,7 @@ void setup (){
   mfrc522.PCD_Init();   // Init MFRC522
   mfrc522.PCD_DumpVersionToSerial();  // Show details of PCD - MFRC522 Card Reader details
   Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
+
 }
 
 void loop (){
@@ -248,7 +249,7 @@ void loop (){
   int Tagflag = AuthTag();
 
   if (Tagflag == 0){
-    Serial.println("タグを検出していません");
+    //Serial.println("タグを検出していません");
     return;
   }
 
