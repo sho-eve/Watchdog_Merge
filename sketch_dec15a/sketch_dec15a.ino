@@ -23,6 +23,8 @@ int motionSensorBefore = 0;
 int sensorTilt = 0;
 int sensorTiltBefore = 0;
 
+int count = 0;
+
 const double a[] = {
   6.237074932031003e-19,  1.203468256554930e-03,  2.789059944207731e-03,  4.234500608097008e-03,
     3.949464324766553e-03,  -2.416866536162014e-18, -8.270810074278890e-03, -1.861479317048980e-02,
@@ -53,7 +55,7 @@ void updateMotionSensor (){
   sensorTiltBefore = sensorTilt;
   motionSensor = analogRead (A2); //A2 AMN22112 using
   motionSensor = fir.filter (motionSensor);
-  sensorTilt = (motionSensor - motionSensorBefore) / 5;
+  sensorTilt = (motionSensor - motionSensorBefore) / 8;
   delay (interval);
 }
 
@@ -79,6 +81,9 @@ Keypad customKeypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS); //
 int Sensor (){
 
   updateMotionSensor();
+  for (int i = 0; i < 11; i++) {
+    motionTilt[i] = 0;
+  }
 
   int exNumber = 0;
 
@@ -209,7 +214,7 @@ int AuthPeople(){
   AbleToPassTime = 0;
   PassNum = 0;
   int startTime = millis();
-  while (AbleToPassTime <= 100000 && PassNum < AbleToPassNum){
+  while (AbleToPassTime <= 10000 && PassNum < AbleToPassNum){
     AbleToPassTime = millis() - startTime;
 
     int val = Sensor();
@@ -228,6 +233,18 @@ int AuthPeople(){
   return 0;
 }
 
+String rootJson(String COUNT,String rfid,String num){
+  const size_t capacity = JSON_OBJECT_SIZE(3) +140;
+  DynamicJsonDocument doc(capacity);
+  JsonObject info = doc.createNestedObject("info");
+  info["COUNT"]=COUNT;
+  info["RFID"] =rfid;
+  info["Num"] = num;
+  String jsonCode;  
+  serializeJson(doc, jsonCode);
+  return jsonCode;
+}
+
 void setup (){
   Serial.begin(9600);
   while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
@@ -240,7 +257,7 @@ void setup (){
 
 void loop (){
   if (Sensor() > 0){
-    Serial.println("Alert001");
+    //Serial.println("Alert001");
     return;
   }
 
@@ -256,12 +273,40 @@ void loop (){
   
 
   if (AuthPeople() == 1){
-    Serial.println("Alert002");
-    Serial.println("現在の情報をリセットします");
+    //Serial.println("Alert002");
+    //Serial.println("現在の情報をリセットします");
     return;
   }
 
-  Serial.println("Success!");
+  count++;
+
+/*
+  StaticJsonDocument<200> doc;
+  String json = "{\"info\":{\"COUNT\":\"";
+  json += count;
+  json += "\",\"RFID\":\"0x";
+  json += "AA351BB1";
+  json += "\",\"Num\":\"";
+  json += PassNum;
+  json += "\"}}";
+
+  DeserializationError error = deserializeJson(doc, json);
+
+  if (error){
+    Serial.print("deserializeJson() failed with code ");
+    Serial.println(error.c_str());
+  }
+
+  int passedNum = doc["Num"];
+  */
+
+  //Serial.println(passedNum);
+  //Serial.println("Success!");
+
+  //Serial.println(json);
+  Serial.println(rootJson(String(count),"AA351BB1",String(PassNum)));
+
+  delay(2000);
   
   
 }
